@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_ADDRESS}:${POSTGRES_ADDRESS_PORT}/${POSTGRES_DB_NAME}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      database: ${REDIS_DATABASE}
+      connect-timeout: ${REDIS_TIMEOUT}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+app:
+  admin:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    ai.lab.cair: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never

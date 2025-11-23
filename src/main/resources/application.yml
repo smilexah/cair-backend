@@ -1,0 +1,32 @@
+spring:
+  jpa:
+    open-in-view: false
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev} # Можно переопределить через переменную окружения SPRING_PROFILES_ACTIVE
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  application:
+    name: cair-back
+  liquibase:
+    change-log: db/changelog/changelog-master.yml
+jwt:
+  access-token-ttl: 900000         # 15 * 60 * 1000 (15 минут)
+  refresh-token-ttl: 2592000000    # 30 * 24 * 60 * 60 * 1000 (30 дней)
+  refresh-cookie-ttl: 2592000      # сек (30 дней)
+rsa:
+  private-key: classpath:keys/private.pem
+  public-key: classpath:keys/public.pem
+server:
+  servlet:
+    context-path: /api/
+  port: 8080
+  address: 0.0.0.0
+
+# SpringDoc конфигурация для правильной работы с context-path
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

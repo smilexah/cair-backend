@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: changelog/v1.0/01-create-table-users.sql
+  - include:
+      file: changelog/v1.0/02-create-table-roles.sql
+  - include:
+      file: changelog/v1.0/03-create-table-user-roles.sql
+  - include:
+      file: changelog/v1.0/04-create-table-translations.sql
+  - include:
+      file: changelog/v1.0/05-create-table-team-members.sql
+  - include:
+      file: changelog/v1.0/06-create-table-projects.sql
