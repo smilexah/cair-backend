@@ -1,0 +1,27 @@
+# Cloudflare Workers configuration
+# Note: This is primarily for frontend or API gateway/proxy
+# For backend Java application, use Cloudflare Tunnel or deploy to cloud provider
+
+name = "cair-backend-proxy"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Workers route configuration
+# Uncomment and configure when ready to deploy
+# routes = [
+#   { pattern = "api.cair.sdu.edu.kz/*", zone_name = "cair.sdu.edu.kz" }
+# ]
+
+# Environment variables
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
+
+# KV Namespaces for caching (optional)
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-namespace-id"
+

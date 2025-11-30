@@ -11,6 +11,9 @@ import ai.lab.cair.repository.TeamMemberRepository;
 import ai.lab.cair.repository.TranslationRepository;
 import ai.lab.cair.service.TeamMemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,10 @@ public class TeamMemberServiceImpl implements TeamMemberService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "teamMembers", allEntries = true),
+            @CacheEvict(value = "teamMemberById", allEntries = true)
+    })
     public TeamMemberResponseDto createTeamMember(TeamMemberRequestDto requestDto) {
         TeamMember teamMember = teamMemberMapper.toEntity(requestDto);
         TeamMember savedTeamMember = teamMemberRepository.save(teamMember);
@@ -42,6 +49,7 @@ public class TeamMemberServiceImpl implements TeamMemberService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "teamMemberById", key = "#id")
     public TeamMemberResponseDto getTeamMemberById(Long id) {
         TeamMember teamMember = teamMemberRepository.findById(id)
                 .orElseThrow(() -> new DbObjectNotFoundException(
@@ -59,8 +67,21 @@ public class TeamMemberServiceImpl implements TeamMemberService {
     public PaginatedResponse<TeamMemberResponseDto> getAllTeamMembers(Pageable pageable) {
         Page<TeamMember> teamMembersPage = teamMemberRepository.findAll(pageable);
 
+        // Batch load all translations to avoid N+1 problem
+        List<Long> memberIds = teamMembersPage.getContent().stream()
+                .map(TeamMember::getId)
+                .toList();
+        
+        List<Translation> allTranslations = translationRepository
+                .findByEntityTypeAndEntityIdIn(ENTITY_TYPE, memberIds);
+        
+        // Group translations by entity ID for efficient lookup
+        var translationsByEntityId = allTranslations.stream()
+                .collect(java.util.stream.Collectors.groupingBy(Translation::getEntityId));
+
         Page<TeamMemberResponseDto> responsePage = teamMembersPage.map(teamMember -> {
-            List<Translation> translations = translationRepository.findByEntityTypeAndEntityId(ENTITY_TYPE, teamMember.getId());
+            List<Translation> translations = translationsByEntityId
+                    .getOrDefault(teamMember.getId(), List.of());
             return teamMemberMapper.toDto(teamMember, translations);
         });
 
@@ -69,6 +90,10 @@ public class TeamMemberServiceImpl implements TeamMemberService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "teamMembers", allEntries = true),
+            @CacheEvict(value = "teamMemberById", key = "#id")
+    })
     public TeamMemberResponseDto updateTeamMember(Long id, TeamMemberRequestDto requestDto) {
         TeamMember teamMember = teamMemberRepository.findById(id)
                 .orElseThrow(() -> new DbObjectNotFoundException(
@@ -89,6 +114,10 @@ public class TeamMemberServiceImpl implements TeamMemberService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "teamMembers", allEntries = true),
+            @CacheEvict(value = "teamMemberById", key = "#id")
+    })
     public void deleteTeamMember(Long id) {
         if (!teamMemberRepository.existsById(id)) {
             throw new DbObjectNotFoundException(

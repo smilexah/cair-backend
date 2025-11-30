@@ -1,0 +1,742 @@
+{
+  "info": {
+    "name": "CAIR Backend API",
+    "description": "Коллекция для тестирования CAIR Backend API с поддержкой JWT аутентификации",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "1"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", jsonData.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"refresh_token\", jsonData.refreshToken);",
+                  "    console.log(\"Access token saved: \" + jsonData.accessToken);",
+                  "}",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has access token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.accessToken).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Вход в систему с получением JWT токена"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.accessToken);",
+                  "}",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            },
+            "description": "Обновление JWT токена"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Выход из системы с деактивацией токена"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has project ID\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.not.be.undefined;",
+                  "    pm.collectionVariables.set(\"project_id\", jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"ai-research-project\",\n  \"title\": {\n    \"en\": \"AI Research Project\",\n    \"ru\": \"Проект исследования ИИ\",\n    \"kz\": \"AI зерттеу жобасы\"\n  },\n  \"shortDescription\": {\n    \"en\": \"Advanced AI research and development\",\n    \"ru\": \"Передовые исследования и разработки ИИ\",\n    \"kz\": \"Озық AI зерттеу және әзірлеу\"\n  },\n  \"fullDescription\": {\n    \"en\": \"This project focuses on developing cutting-edge AI solutions...\",\n    \"ru\": \"Этот проект фокусируется на разработке передовых решений ИИ...\",\n    \"kz\": \"Бұл жоба озық AI шешімдерін әзірлеуге бағытталған...\"\n  },\n  \"image\": \"/projects/ai-project.svg\",\n  \"tags\": [\"AI\", \"Machine Learning\", \"Research\"],\n  \"status\": \"active\",\n  \"startDate\": \"2024-01-15\",\n  \"endDate\": null,\n  \"team\": [\"John Doe\", \"Jane Smith\"],\n  \"objectives\": {\n    \"en\": [\"Develop AI models\", \"Research new algorithms\"],\n    \"ru\": [\"Разработать модели ИИ\", \"Исследовать новые алгоритмы\"],\n    \"kz\": [\"AI модельдерін әзірлеу\", \"Жаңа алгоритмдерді зерттеу\"]\n  },\n  \"results\": {\n    \"en\": [\"Published 3 papers\"],\n    \"ru\": [\"Опубликовано 3 статьи\"],\n    \"kz\": [\"3 мақала жарияланды\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects"
+              ]
+            },
+            "description": "Создание нового проекта (требуется ADMIN роль)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Projects",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has pagination data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "    pm.expect(jsonData.page).to.not.be.undefined;",
+                  "    pm.expect(jsonData.size).to.not.be.undefined;",
+                  "    pm.expect(jsonData.totalElements).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/projects?page=0&size=10&sortBy=id&direction=ASC",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "id"
+                },
+                {
+                  "key": "direction",
+                  "value": "ASC"
+                }
+              ]
+            },
+            "description": "Получение списка всех проектов с пагинацией"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has project data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.not.be.undefined;",
+                  "    pm.expect(jsonData.slug).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/projects/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "1"
+              ]
+            },
+            "description": "Получение проекта по ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project by Slug",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct slug\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.slug).to.eql(\"ai-research-project\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/projects/slug/ai-research-project",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "slug",
+                "ai-research-project"
+              ]
+            },
+            "description": "Получение проекта по slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"ai-research-project-updated\",\n  \"title\": {\n    \"en\": \"AI Research Project - Updated\",\n    \"ru\": \"Проект исследования ИИ - Обновлено\",\n    \"kz\": \"AI зерттеу жобасы - Жаңартылды\"\n  },\n  \"shortDescription\": {\n    \"en\": \"Advanced AI research and development - Updated\",\n    \"ru\": \"Передовые исследования и разработки ИИ - Обновлено\",\n    \"kz\": \"Озық AI зерттеу және әзірлеу - Жаңартылды\"\n  },\n  \"fullDescription\": {\n    \"en\": \"This project focuses on developing cutting-edge AI solutions - Updated...\",\n    \"ru\": \"Этот проект фокусируется на разработке передовых решений ИИ - Обновлено...\",\n    \"kz\": \"Бұл жоба озық AI шешімдерін әзірлеуге бағытталған - Жаңартылды...\"\n  },\n  \"image\": \"/projects/ai-project-updated.svg\",\n  \"tags\": [\"AI\", \"Machine Learning\", \"Research\", \"Updated\"],\n  \"status\": \"active\",\n  \"startDate\": \"2024-01-15\",\n  \"endDate\": null,\n  \"team\": [\"John Doe\", \"Jane Smith\", \"Bob Johnson\"],\n  \"objectives\": {\n    \"en\": [\"Develop AI models\", \"Research new algorithms\", \"Publish papers\"],\n    \"ru\": [\"Разработать модели ИИ\", \"Исследовать новые алгоритмы\", \"Опубликовать статьи\"],\n    \"kz\": [\"AI модельдерін әзірлеу\", \"Жаңа алгоритмдерді зерттеу\", \"Мақалаларды жариялау\"]\n  },\n  \"results\": {\n    \"en\": [\"Published 5 papers\"],\n    \"ru\": [\"Опубликовано 5 статей\"],\n    \"kz\": [\"5 мақала жарияланды\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "1"
+              ]
+            },
+            "description": "Обновление существующего проекта (требуется ADMIN роль)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/projects/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "1"
+              ]
+            },
+            "description": "Удаление проекта (требуется ADMIN роль)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Team Members",
+      "item": [
+        {
+          "name": "Create Team Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has member ID\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.not.be.undefined;",
+                  "    pm.collectionVariables.set(\"member_id\", jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"role\": {\n    \"en\": \"Senior Researcher\",\n    \"ru\": \"Старший научный сотрудник\",\n    \"kz\": \"Аға ғылыми қызметкер\"\n  },\n  \"bio\": {\n    \"en\": \"Expert in AI and Machine Learning with 10 years of experience\",\n    \"ru\": \"Эксперт в области ИИ и машинного обучения с 10-летним опытом\",\n    \"kz\": \"AI және машиналық оқыту саласындағы 10 жылдық тәжірибесі бар сарапшы\"\n  },\n  \"image\": \"https://example.com/photos/john-doe.jpg\",\n  \"expertise\": [\"Machine Learning\", \"Deep Learning\", \"NLP\", \"Computer Vision\"],\n  \"email\": \"john.doe@example.com\",\n  \"linkedin\": \"https://linkedin.com/in/johndoe\",\n  \"github\": \"https://github.com/johndoe\",\n  \"scholar\": \"https://scholar.google.com/citations?user=johndoe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/team-members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team-members"
+              ]
+            },
+            "description": "Создание нового члена команды (требуется ADMIN роль)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Team Members",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has pagination data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "    pm.expect(jsonData.page).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/team-members?page=0&size=10&sortBy=id&direction=ASC",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team-members"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "id"
+                },
+                {
+                  "key": "direction",
+                  "value": "ASC"
+                }
+              ]
+            },
+            "description": "Получение списка всех членов команды с пагинацией"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Team Member by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has member data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.not.be.undefined;",
+                  "    pm.expect(jsonData.name).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/team-members/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team-members",
+                "1"
+              ]
+            },
+            "description": "Получение члена команды по ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Team Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe - Updated\",\n  \"role\": {\n    \"en\": \"Lead Researcher\",\n    \"ru\": \"Ведущий научный сотрудник\",\n    \"kz\": \"Жетекші ғылыми қызметкер\"\n  },\n  \"bio\": {\n    \"en\": \"Expert in AI and Machine Learning with 12 years of experience\",\n    \"ru\": \"Эксперт в области ИИ и машинного обучения с 12-летним опытом\",\n    \"kz\": \"AI және машиналық оқыту саласындағы 12 жылдық тәжірибесі бар сарапшы\"\n  },\n  \"image\": \"https://example.com/photos/john-doe-updated.jpg\",\n  \"expertise\": [\"Machine Learning\", \"Deep Learning\", \"NLP\", \"Computer Vision\", \"Reinforcement Learning\"],\n  \"email\": \"john.doe.updated@example.com\",\n  \"linkedin\": \"https://linkedin.com/in/johndoe-updated\",\n  \"github\": \"https://github.com/johndoe-updated\",\n  \"scholar\": \"https://scholar.google.com/citations?user=johndoe-updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/team-members/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team-members",
+                "1"
+              ]
+            },
+            "description": "Обновление информации о члене команды (требуется ADMIN роль)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Team Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/team-members/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team-members",
+                "1"
+              ]
+            },
+            "description": "Удаление члена команды (требуется ADMIN роль)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+

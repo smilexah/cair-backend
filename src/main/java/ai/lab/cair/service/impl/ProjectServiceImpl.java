@@ -11,6 +11,9 @@ import ai.lab.cair.repository.ProjectRepository;
 import ai.lab.cair.repository.TranslationRepository;
 import ai.lab.cair.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "projects", allEntries = true),
+            @CacheEvict(value = "projectById", allEntries = true),
+            @CacheEvict(value = "projectBySlug", allEntries = true)
+    })
     public ProjectResponseDto createProject(ProjectRequestDto requestDto) {
         // Check if slug already exists
         if (projectRepository.existsBySlug(requestDto.getSlug())) {
@@ -47,6 +55,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "projectById", key = "#id")
     public ProjectResponseDto getProjectById(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new DbObjectNotFoundException(
@@ -61,6 +70,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "projectBySlug", key = "#slug")
     public ProjectResponseDto getProjectBySlug(String slug) {
         Project project = projectRepository.findBySlug(slug)
                 .orElseThrow(() -> new DbObjectNotFoundException(
@@ -78,8 +88,21 @@ public class ProjectServiceImpl implements ProjectService {
     public PaginatedResponse<ProjectResponseDto> getAllProjects(Pageable pageable) {
         Page<Project> projectsPage = projectRepository.findAll(pageable);
 
+        // Batch load all translations to avoid N+1 problem
+        List<Long> projectIds = projectsPage.getContent().stream()
+                .map(Project::getId)
+                .toList();
+        
+        List<Translation> allTranslations = translationRepository
+                .findByEntityTypeAndEntityIdIn(ENTITY_TYPE, projectIds);
+        
+        // Group translations by entity ID for efficient lookup
+        var translationsByEntityId = allTranslations.stream()
+                .collect(java.util.stream.Collectors.groupingBy(Translation::getEntityId));
+
         Page<ProjectResponseDto> responsePage = projectsPage.map(project -> {
-            List<Translation> translations = translationRepository.findByEntityTypeAndEntityId(ENTITY_TYPE, project.getId());
+            List<Translation> translations = translationsByEntityId
+                    .getOrDefault(project.getId(), List.of());
             return projectMapper.toDto(project, translations);
         });
 
@@ -88,6 +111,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "projects", allEntries = true),
+            @CacheEvict(value = "projectById", key = "#id"),
+            @CacheEvict(value = "projectBySlug", allEntries = true)
+    })
     public ProjectResponseDto updateProject(Long id, ProjectRequestDto requestDto) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new DbObjectNotFoundException(
@@ -114,6 +142,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "projects", allEntries = true),
+            @CacheEvict(value = "projectById", key = "#id"),
+            @CacheEvict(value = "projectBySlug", allEntries = true)
+    })
     public void deleteProject(Long id) {
         if (!projectRepository.existsById(id)) {
             throw new DbObjectNotFoundException(

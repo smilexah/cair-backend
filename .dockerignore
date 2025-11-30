@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# IDE
+.idea
+.vscode
+*.iml
+*.iws
+*.ipr
+.settings
+.project
+.classpath
+
+# Build
+build
+target
+out
+bin
+.gradle
+
+# Documentation
+*.md
+docs
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+**/test/**
+**/*Test.java
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+

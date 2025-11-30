@@ -11,3 +11,5 @@ databaseChangeLog:
       file: changelog/v1.0/05-create-table-team-members.sql
   - include:
       file: changelog/v1.0/06-create-table-projects.sql
+  - include:
+      file: changelog/v1.0/07-add-performance-indexes.sql
