@@ -30,7 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
 
-    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.5.5")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:4.0.0")
 
     implementation("io.github.cdimascio:dotenv-java:3.0.0")
 
