@@ -45,8 +45,8 @@ dependencies {
 
     implementation("org.liquibase:liquibase-core")
 
-    implementation("org.mapstruct:mapstruct:1.5.5.Final")
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
 
