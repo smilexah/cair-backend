@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Profile;
         ),
         servers = {
                 @Server(url = "http://localhost:8080/api", description = "Local server"),
-                @Server(url = "https://api.cair.sdu.edu.kz/api", description = "Production server")
+                @Server(url = "https://cair-backend-production.up.railway.app/api", description = "Production server")
         }
 )
 

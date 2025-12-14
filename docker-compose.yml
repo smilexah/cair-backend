@@ -96,6 +96,7 @@ services:
       - REDIS_TIMEOUT=${REDIS_TIMEOUT}
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     depends_on:
       postgres:
         condition: service_healthy
